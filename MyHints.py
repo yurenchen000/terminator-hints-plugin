@@ -110,7 +110,7 @@ class MyHints(TerminalHandler):
 
 import re, string
 hints = {}
-hotkeys = 'pnhdlwi'
+hotkeys = 'pnhdlwiu'
 selkeys = string.digits[1:]+'0'+string.ascii_letters
 selkeys = re.sub(rf'[{hotkeys}]', '', selkeys)
 
@@ -141,6 +141,9 @@ def gen_hints(txt, kind='p', hl=None):
         pat = re.compile(r'(\d{3,})')
     elif kind == 'i':
         pat = re.compile(r'(\d+(?:\.\d+){3}(?::\d+)?)')
+    elif kind == 'u':
+        pat = re.compile(r'([A-Za-z0-9]+://[A-Za-z0-9%-_]+(?:/[A-Za-z0-9%-_])*(?:#|\\?)[A-Za-z0-9%-_&=]*)')
+        ## url pattern from https://stackoverflow.com/a/72358332/4896468
 
     ## count total
     out = re.findall(pat, txt)
@@ -185,6 +188,7 @@ def gen_hints(txt, kind='p', hl=None):
     <span bgcolor="#006400" fgcolor="black" weight="bold">l</span>i<span
           bgcolor="#006400" fgcolor="black" weight="bold">n</span>e
     <span bgcolor="#006400" fgcolor="black" weight="bold">i</span>p
+    <span bgcolor="#006400" fgcolor="black" weight="bold">u</span>rl
     '''
     tip_hotkeys = re.sub(r'\s*\n\s*', ' ', tip_hotkeys)
     # print(out)
