@@ -28,10 +28,11 @@ by default, press `Ctrl+Shift+P` (override `go_prev` shortcut action), then pres
 - `h`: match hex
 - `d`: match dec
 - `i`: match ip[:port]
+- `u`: match url
 - `w`: match word
 
-then press the key to input highlight strings.
-or `ESC` to giveup
+then press the key to input highlight strings. or 
+- `ESC` to giveup
 
 note: behavor not exactly the same as kitty-hints
 
