@@ -9,6 +9,10 @@ A Terminator Plugin implement
 
 Repo: https://github.com/yurenchen000/terminator-hints-plugin
 
+## requirements
+
+only tested with terminator 2.1.1+, on ubuntu 22 lts
+
 ## Install
 
 1. Copy MyHints.py to ~/.config/terminator/plugins/
