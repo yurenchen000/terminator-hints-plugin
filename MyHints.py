@@ -4,7 +4,7 @@ Terminator plugin to implement
 
  Author: yurenchen@yeah.net
 License: GPLv2
-   Site: https://github.com/yurenchen000/TerminatorHints
+   Site: https://github.com/yurenchen000/terminator-hints-plugin
 '''
 
 import gi
