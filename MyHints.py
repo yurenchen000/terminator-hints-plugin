@@ -222,6 +222,8 @@ class MyHintsImpl:
 
         self.txt = None
         self.kind = None
+        self.key_old = None
+        self.key_pressed = {}
         
     @staticmethod
     def setup_for_term(term):
@@ -283,6 +285,8 @@ class MyHintsImpl:
 
         self.txt, _ = term.vte.get_text()
         self.kind = 'p'
+        self.key_old = None
+        self.key_pressed = {}
         html = gen_hints(self.txt, self.kind)
         self.set_htm(html.rstrip())
 
@@ -304,6 +308,7 @@ class MyHintsImpl:
         win.add(tv)
         # print('++add_win:', win)
         tv.connect("key-press-event", self.on_key_press)
+        tv.connect('key-release-event', self.on_key_release)
         # print('self term box:', self.term.terminalbox)
         self.term.terminalbox.pack_start(win, True, True, 0)
 
@@ -336,7 +341,8 @@ class MyHintsImpl:
 
     def on_key_press(self, elem, event):
         key = Gdk.keyval_name(event.keyval)
-        print('key_press:', key)
+        self.key_pressed[key] = True
+        print('key_press:', key, key == self.key_old)
         # print('==the_win:', self.win)
 
         if key == 'Escape':
@@ -347,8 +353,10 @@ class MyHintsImpl:
             html = gen_hints(self.txt, self.kind)
             self.set_htm(html.rstrip())
         if key in selkeys and key in hints:
-            print('you choice:', hints[key])
-            html = gen_hints(self.txt, self.kind, hl=key)
+            if key == self.key_old: # repeat key
+                return
+
+            html = gen_hints(self.txt, self.kind, hl=key) # change highlight item
             self.set_htm(html.rstrip())
 
             def done(s):
@@ -356,5 +364,26 @@ class MyHintsImpl:
                 hide_widget(self.win)
                 return False
 
-            GLib.timeout_add(300, done, 'bye')
+            # GLib.timeout_add(300, done, 'bye')
+
+        self.key_old = key
+
+    def on_key_release(self, elem, event):
+        key = Gdk.keyval_name(event.keyval)
+        self.key_pressed.pop(key, False)
+        print('key_release:', key, list(self.key_pressed.keys()))
+        # print('==the_win:', self.win)
+
+        if len(self.key_pressed): # change highlight item
+            last_key = list(self.key_pressed.keys())[-1] # avoid https://gitlab.gnome.org/GNOME/gtk/-/issues/1570
+            if key in selkeys and last_key in hints:
+                html = gen_hints(self.txt, self.kind, hl=last_key)
+                self.set_htm(html.rstrip())
+        else:                     # final choice
+            if key in selkeys and key in hints:
+                self.done_hints(hints[key])
+                hide_widget(self.win)
+                print('==you choice:', hints[key])
+
+        self.key_old = None
 
