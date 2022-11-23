@@ -147,20 +147,24 @@ def gen_hints(txt, kind='p', hl=None):
 
     ## count total
     out = re.findall(pat, txt)
-    count = len(out)
-    print('--count:', len(out))
+    idx = {}  # DENSE RANK
+    for i,v in enumerate(reversed(out)):
+        idx[v] = idx.get(v, len(idx))
+        # print(i, idx[v], v)
+
+    print('--count:', len(out), len(idx))
 
     ## generate html
     global hints
     hints = {}
-    i = count
+    count = len(idx)
     def replace_cb(match_obj):
         nonlocal i
-        i-=1
+        s = match_obj.group(1)
+        i = idx.get(s)
         # print('match:', match_obj)
-        if i<0 or i>=len(selkeys): return match_obj.group(1) ## keys depleted, giveup
-        if match_obj.group(1) is not None:
-            s = match_obj.group(1)
+        if i<0 or i>=len(selkeys): return s   ## keys depleted, giveup
+        if s is not None:
             n = ea+str(selkeys[i])+ez
             hints[selkeys[i]] = s
             if hl and hl in selkeys[:count]:
