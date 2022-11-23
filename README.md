@@ -34,7 +34,9 @@ by default, press `Ctrl+Shift+P` (override `go_prev` shortcut action), then pres
 then press the key to input highlight strings. or 
 - `ESC` to giveup
 
-note: behavor not exactly the same as kitty-hints
+Tips: hesitate choice: hold can highlight choice, then press another key can change choice (last key up is final choice)  
+
+Note: behavor not exactly the same as kitty-hints
 
 ## screenshot
 
