@@ -290,6 +290,7 @@ class MyHintsImpl:
         self.txt, _ = term.vte.get_text()
         self.kind = 'p'
         self.key_old = None
+        self.key_last = None
         self.key_pressed = {}
         html = gen_hints(self.txt, self.kind)
         self.set_htm(html.rstrip())
@@ -375,16 +376,22 @@ class MyHintsImpl:
     def on_key_release(self, elem, event):
         key = Gdk.keyval_name(event.keyval)
         self.key_pressed.pop(key, False)
+        self.key_pressed.pop(key.swapcase(), False)
         print('key_release:', key, list(self.key_pressed.keys()))
         # print('==the_win:', self.win)
 
         if len(self.key_pressed): # change highlight item
-            last_key = list(self.key_pressed.keys())[-1] # avoid https://gitlab.gnome.org/GNOME/gtk/-/issues/1570
-            if key in selkeys and last_key in hints:
-                html = gen_hints(self.txt, self.kind, hl=last_key)
+            self.key_last = list(self.key_pressed.keys())[-1] # avoid https://gitlab.gnome.org/GNOME/gtk/-/issues/1570
+            if key in selkeys and self.key_last in hints:
+                html = gen_hints(self.txt, self.kind, hl=self.key_last)
                 self.set_htm(html.rstrip())
+            if self.key_last in ['Shift_L','Shift_R']:
+                self.key_last = key
         else:                     # final choice
-            if key in selkeys and key in hints:
+            if key in ['Shift_L','Shift_R']:
+                # print('key_last:', self.key_last)
+                key = self.key_last
+            if key in hints:
                 self.done_hints(hints[key])
                 hide_widget(self.win)
                 print('==you choice:', hints[key])
