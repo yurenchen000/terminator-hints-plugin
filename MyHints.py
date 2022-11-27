@@ -128,7 +128,7 @@ def gen_hints(txt, kind='p', hl=None):
     mz='</span>'
 
     if kind == 'p':
-        pat = re.compile(r'([\w/\._-]+/[\w/\._-]+)')
+        pat = re.compile(r'(~?[\w/\._-]+/[\w/\._-]+)')
     elif kind == 'n':
         pat = re.compile(r'([\w/\._-]+?:\d+)')
     elif kind == 'l':
