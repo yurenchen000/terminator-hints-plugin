@@ -34,8 +34,8 @@ by default, press `Ctrl+Shift+P` (override `go_prev` shortcut action), then pres
 then press the key to input highlight strings. or 
 - `ESC` to giveup
 
-Tips: hesitate choice: hold can highlight choice, then press another key can change choice (last key up is final choice)  
-
+Tips: hesitate choice: hold to highlight, then press another key can change choice (last key up is final choice)  
+Tips: same items use same select key  
 Note: behavor not exactly the same as kitty-hints
 
 ## screenshot & use case
@@ -59,4 +59,9 @@ kind change
 [hints_5_kind_change_2.webm](https://user-images.githubusercontent.com/8458213/205635441-9d6cba03-3f8d-43b5-87b4-7ab5cf9f27ed.webm)
 
 
+## thanks to 
+- [kitty terminal emulator](https://sw.kovidgoyal.net/kitty)  
+  // pioneering solution to avoid mouse interrupt
+- [terminator-editor-plugin](https://github.com/mchelem/terminator-editor-plugin)  
+  // the inspect way to get_terminal in plugin
 
