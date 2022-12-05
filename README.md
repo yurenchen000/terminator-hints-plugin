@@ -38,8 +38,25 @@ Tips: hesitate choice: hold can highlight choice, then press another key can cha
 
 Note: behavor not exactly the same as kitty-hints
 
-## screenshot
+## screenshot & use case
+
 
 [terminator_hints3.webm](https://user-images.githubusercontent.com/8458213/201852859-2e9f5a76-40b3-4859-bc52-33b75099be17.webm)
+
+pick line  
+[hints_1_line_3.webm](https://user-images.githubusercontent.com/8458213/205634937-eafc3fe0-ac91-4a43-a68d-4bdc2a1f30d7.webm)
+
+pick word  
+[hints_2_word.webm](https://user-images.githubusercontent.com/8458213/205635190-50ee1654-fea4-40d5-8317-c4e68099cabd.webm)
+
+pick pid  
+[hints_3_pid.webm](https://user-images.githubusercontent.com/8458213/205635298-b394c7b7-05ac-4c54-bbbf-3c1bcbfe8dff.webm)
+
+pick ipaddr & hesitate choice  
+[hints_4_ip_hesitate_choice.webm](https://user-images.githubusercontent.com/8458213/205635361-ae75161a-ee37-4680-bad7-9ad8e28706c0.webm)
+
+kind change  
+[hints_5_kind_change_2.webm](https://user-images.githubusercontent.com/8458213/205635441-9d6cba03-3f8d-43b5-87b4-7ab5cf9f27ed.webm)
+
 
 
