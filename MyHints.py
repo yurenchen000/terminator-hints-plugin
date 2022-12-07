@@ -135,7 +135,7 @@ def gen_hints(txt, kind='p', hl=None):
         pat = re.compile(r'^[ \f\t]*(.*\S.*)[ \f\t]*$', re.MULTILINE)
     elif kind == 'w':
         # pat = re.compile(r'([\S]{4,})')
-        pat = re.compile(r'([\w-]{4,})')
+        pat = re.compile(r'([\w.-]{4,})')
     elif kind == 'h':
         pat = re.compile(r'(\b[0-9a-fA-F]{6,}\b)')
     elif kind == 'd':
