@@ -112,7 +112,7 @@ import re, string
 hints = {}
 hotkeys = 'pnhdlwiu'
 selkeys = string.digits[1:]+'0'+string.ascii_letters
-selkeys = re.sub(rf'[{hotkeys}]', '', selkeys)
+selkeys = re.sub(rf'[{hotkeys}P]', '', selkeys)
 
 
 def gen_hints(txt, kind='p', hl=None):
