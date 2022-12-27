@@ -323,7 +323,7 @@ class MyHintsImpl:
         self.tb = tb
 
     def init_style(self):
-        self.tv.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+        self.tv.set_wrap_mode(Gtk.WrapMode.CHAR)
         self.tv.set_property('cursor-visible', False)
         self.tv.set_property('editable', False)
         self.tv.override_font(self.term.vte.get_font().copy())
