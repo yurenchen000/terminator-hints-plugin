@@ -312,9 +312,6 @@ class MyHintsImpl:
 
     ### --------- hints inner
     def init_ui(self):
-        # tv = Gtk.TextView()
-        # tb = tv.get_buffer()
-
         tv = Vte.Terminal()
         win = Gtk.ScrolledWindow()
         win.add(tv)
@@ -325,41 +322,19 @@ class MyHintsImpl:
         self.term.terminalbox.pack_start(win, True, True, 0)
         self.term.terminalbox.reorder_child(win, 1)
 
-        # win.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.ALWAYS)
-        # win.set_overlay_scrolling(False)
         self.win = win
         self.tv = tv
-        # self.tb = tb
 
     def init_style(self):
-        # self.tv.set_wrap_mode(Gtk.WrapMode.CHAR)
-        # self.tv.set_property('cursor-visible', False)
-        # self.tv.set_property('editable', False)
-        # self.tv.override_font(self.term.vte.get_font().copy())
         self.tv.set_font(self.term.vte.get_font().copy())
 
-        prov = Gtk.CssProvider.new()
-        prov.load_from_data('''
-        text {
-            color: grey;
-            background-color: black;
-        }
-        '''.encode())
 
-        # self.win.set_opacity(0.8)
-        ctx = self.win.get_style_context()
-        ctx.add_provider_for_screen(self.win.get_screen(), prov, 800)
-        pass
-
-    def set_htm(self, txt): ## NOTE: It not real HTML, just `Pango Markup`
-        # self.tb.set_text('')
-        # self.tb.insert_markup(self.tb.get_end_iter(), txt, -1)
-
-        # Write the text to the terminal
+    ## disp text
+    def set_htm(self, txt): ## NOTE: It's ansi sequence now
         # clear_screen = '\033[2J\033[H'
         # self.tv.feed(clear_screen.encode("utf-8"))
 
-        hide_cursor='\033[?25l'
+        # hide_cursor='\033[?25l'
         # self.tv.feed(hide_cursor.encode("utf-8"))
 
         # self.tv.reset(True, True)
@@ -372,8 +347,6 @@ class MyHintsImpl:
         txt = txt.replace('\n','\r\n')
         # txt = hide_cursor + txt
         self.tv.feed(txt.encode("utf-8"))
-
-
 
 
     def on_key_press(self, elem, event):
