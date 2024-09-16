@@ -114,7 +114,7 @@ hints = {}
 hotkeys = 'pnhdlwiu'
 selkeys = string.digits[1:]+'0'+string.ascii_letters
 selkeys = re.sub(rf'[{hotkeys}P]', '', selkeys)
-
+custom_re = ''
 
 def gen_hints(txt, kind='p', hl=None):
     print('==gen_hints:', kind, hl)
@@ -146,6 +146,8 @@ def gen_hints(txt, kind='p', hl=None):
     elif kind == 'u':
         pat = re.compile(r'([A-Za-z0-9]+://[A-Za-z0-9%-_]+(?:/[A-Za-z0-9%-_])*(?:#|\\?)[A-Za-z0-9%-_&=]*)')
         ## url pattern from https://stackoverflow.com/a/72358332/4896468
+    elif kind == '/':
+        pat = re.compile(r'('+custom_re+')')
 
     ## count total
     out = re.findall(pat, txt)
@@ -196,6 +198,7 @@ def gen_hints(txt, kind='p', hl=None):
     \x1b[48;5;28m\x1b[97mn\x1b[0me
     \x1b[48;5;28m\x1b[97mi\x1b[0mp
     \x1b[48;5;28m\x1b[97mu\x1b[0mrl
+    \x1b[48;5;28m\x1b[97m/\x1b[0mre
     '''
     tip_hotkeys = re.sub(r'\s*\n\s*', ' ', tip_hotkeys)
     # print(out)
@@ -231,6 +234,7 @@ class MyHintsImpl:
         self.kind = None
         self.key_old = None
         self.key_pressed = {}
+        # self.custom_re = ''
         
     @staticmethod
     def setup_for_term(term):
@@ -318,12 +322,33 @@ class MyHintsImpl:
         # print('++add_win:', win)
         tv.connect("key-press-event", self.on_key_press)
         tv.connect('key-release-event', self.on_key_release)
-        # print('self term box:', self.term.terminalbox)
-        self.term.terminalbox.pack_start(win, True, True, 0)
-        self.term.terminalbox.reorder_child(win, 1)
 
-        self.win = win
+
+        #### input at bottom right corner
+        ti = Gtk.Entry()
+        ti.set_size_request(200, -1)
+
+        # Align the input at the bottom right
+        overlay = Gtk.Overlay()
+        overlay.add(win)
+        overlay.add_overlay(ti)
+        overlay.set_overlay_pass_through(win, True)
+        ti.set_halign(Gtk.Align.END)
+        ti.set_valign(Gtk.Align.END)
+        hide_widget(ti)
+
+        # Handle input for ti
+        ti.connect("activate", self.on_ti_change)
+        ti.connect("key-release-event", self.on_ti_key_release)
+
+        self.win = overlay
         self.tv = tv
+        self.ti = ti
+
+        # print('self term box:', self.term.terminalbox)
+        self.term.terminalbox.pack_start(self.win, True, True, 0)
+        self.term.terminalbox.reorder_child(self.win, 1)
+
 
     def init_style(self):
         self.tv.set_font(self.term.vte.get_font().copy())
@@ -351,6 +376,38 @@ class MyHintsImpl:
         self.tv.feed(txt.encode("utf-8"))
 
 
+    def on_ti_change(self, elem):
+        # Get the input text
+        input_text = elem.get_text()
+        print(f"ti change: {input_text}")
+        # elem.set_text("")
+        global custom_re
+        custom_re = input_text
+
+        self.kind = '/'
+        html = gen_hints(self.txt, self.kind)
+        self.set_htm(html.rstrip())
+        hide_widget(self.ti)
+        self.tv.grab_focus()
+
+    def on_ti_key_release(self, elem, event):
+        key = Gdk.keyval_name(event.keyval)
+        print('ti key_up:', key, ' val:', elem.get_text())
+
+        ti_tmp = elem.get_text()
+        try:
+            pat = re.compile(r'('+ti_tmp+')')
+        except Exception:
+            pass
+        else:
+            if len(ti_tmp):
+                global custom_re
+                custom_re = ti_tmp
+                self.kind = '/'
+                html = gen_hints(self.txt, self.kind)
+                self.set_htm(html.rstrip())
+
+
     def on_key_press(self, elem, event):
         key = Gdk.keyval_name(event.keyval)
         self.key_pressed[key] = True
@@ -360,6 +417,10 @@ class MyHintsImpl:
         if key == 'Escape':
             self.done_hints(None)
             hide_widget(self.win)
+        if key == 'slash':
+            self.key_pressed.pop(key, False)
+            show_widget(self.ti)
+            self.ti.grab_focus_without_selecting()
         if key in hotkeys:
             self.kind = key
             html = gen_hints(self.txt, self.kind)
