@@ -303,7 +303,7 @@ class MyHintsImpl:
         self.scrollbar_visible = term.scrollbar.props.visible
         # hide term
         hide_widget(term.vte)
-        hide_widget(term.scrollbar)
+        # hide_widget(term.scrollbar)
 
         # show hints
         show_widget(self.win)
@@ -323,7 +323,10 @@ class MyHintsImpl:
         tv.connect('key-release-event', self.on_key_release)
         # print('self term box:', self.term.terminalbox)
         self.term.terminalbox.pack_start(win, True, True, 0)
+        self.term.terminalbox.reorder_child(win, 1)
 
+        # win.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.ALWAYS)
+        # win.set_overlay_scrolling(False)
         self.win = win
         self.tv = tv
         # self.tb = tb
