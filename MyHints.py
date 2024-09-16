@@ -327,22 +327,24 @@ class MyHintsImpl:
 
     def init_style(self):
         self.tv.set_font(self.term.vte.get_font().copy())
+        self.tv.set_color_cursor(Gdk.RGBA(0,0,0,0))
+        self.tv.set_color_cursor_foreground(Gdk.RGBA(0,0,0,0))
+        self.tv.set_cursor_blink_mode(Vte.CursorBlinkMode.OFF)
+        self.tv.set_cursor_shape(Vte.CursorShape.UNDERLINE)
 
+        # self.tv.set_colors(Gdk.RGBA(0.5,0.5,0.5, 1), Gdk.RGBA(0.1,0.1,0.1, 1), None)  # fg,bg,palette
+        self.tv.set_color_foreground(Gdk.RGBA(0.5,0.5,0.5, 1))
+        self.tv.set_color_background(Gdk.RGBA(0.1,0.1,0.1, 1))
 
     ## disp text
     def set_htm(self, txt): ## NOTE: It's ansi sequence now
         # clear_screen = '\033[2J\033[H'
         # self.tv.feed(clear_screen.encode("utf-8"))
-
-        # hide_cursor='\033[?25l'
+        # hide_cursor = '\033[?25l'
         # self.tv.feed(hide_cursor.encode("utf-8"))
 
         # self.tv.reset(True, True)
         self.tv.reset(False, True)
-        self.tv.set_color_cursor(Gdk.RGBA(0,0,0,0))
-        self.tv.set_color_cursor_foreground(Gdk.RGBA(0,0,0,0))
-        self.tv.set_cursor_blink_mode(Vte.CursorBlinkMode.OFF)
-        self.tv.set_cursor_shape(Vte.CursorShape.UNDERLINE)
 
         txt = txt.replace('\n','\r\n')
         # txt = hide_cursor + txt
