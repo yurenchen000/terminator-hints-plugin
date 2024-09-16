@@ -338,7 +338,8 @@ class MyHintsImpl:
         hide_widget(ti)
 
         # Handle input for ti
-        ti.connect("activate", self.on_ti_change)
+        # ti.connect("activate",          self.on_ti_change)
+        ti.connect("key-press-event",   self.on_ti_key_press)
         ti.connect("key-release-event", self.on_ti_key_release)
 
         self.win = overlay
@@ -361,6 +362,15 @@ class MyHintsImpl:
         self.tv.set_color_foreground(Gdk.RGBA(0.5,0.5,0.5, 1))
         self.tv.set_color_background(Gdk.RGBA(0.1,0.1,0.1, 1))
 
+
+        ## color for ti.invalid 
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(f"entry.invalid {{ color: red; }}".encode('utf-8'))
+
+        style_context = self.ti.get_style_context()
+        style_context.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+
     ## disp text
     def set_htm(self, txt): ## NOTE: It's ansi sequence now
         # clear_screen = '\033[2J\033[H'
@@ -376,36 +386,45 @@ class MyHintsImpl:
         self.tv.feed(txt.encode("utf-8"))
 
 
-    def on_ti_change(self, elem):
-        # Get the input text
-        input_text = elem.get_text()
-        print(f"ti change: {input_text}")
-        # elem.set_text("")
-        global custom_re
-        custom_re = input_text
-
-        self.kind = '/'
-        html = gen_hints(self.txt, self.kind)
-        self.set_htm(html.rstrip())
-        hide_widget(self.ti)
-        self.tv.grab_focus()
-
-    def on_ti_key_release(self, elem, event):
-        key = Gdk.keyval_name(event.keyval)
-        print('ti key_up:', key, ' val:', elem.get_text())
-
+    def try_custom_match(self, elem):
         ti_tmp = elem.get_text()
         try:
             pat = re.compile(r'('+ti_tmp+')')
         except Exception:
-            pass
+            elem.get_style_context().add_class('invalid')
+            return False
         else:
+            elem.get_style_context().remove_class('invalid')
             if len(ti_tmp):
                 global custom_re
                 custom_re = ti_tmp
                 self.kind = '/'
                 html = gen_hints(self.txt, self.kind)
                 self.set_htm(html.rstrip())
+                return True
+            return None
+
+    # def on_ti_change(self, elem):
+    #     input_text = elem.get_text()
+    #     print('ti change:', input_text)
+
+    #     self.try_custom_match(elem)
+    #     hide_widget(self.ti)
+    #     self.tv.grab_focus()
+
+    def on_ti_key_press(self, elem, event):
+        key = Gdk.keyval_name(event.keyval)
+        print('ti key_press:', key, key == self.key_old)
+        if key in ['Return','Escape']: ## close input, immediately (ASAP)
+            hide_widget(self.ti)
+            self.tv.grab_focus()
+
+    def on_ti_key_release(self, elem, event):
+        key = Gdk.keyval_name(event.keyval)
+        print('ti key_up:', key, ' val:', elem.get_text())
+        if key in ['Return','Escape']: ## close input, stop handling
+            return
+        self.try_custom_match(elem)    ## handing after each input
 
 
     def on_key_press(self, elem, event):
@@ -417,7 +436,7 @@ class MyHintsImpl:
         if key == 'Escape':
             self.done_hints(None)
             hide_widget(self.win)
-        if key == 'slash':
+        if key == 'slash':  ## show re input
             self.key_pressed.pop(key, False)
             show_widget(self.ti)
             self.ti.grab_focus_without_selecting()
