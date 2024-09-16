@@ -10,6 +10,7 @@ License: GPLv2
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Vte
 
 AVAILABLE = ['MyHints']
 
@@ -122,10 +123,10 @@ def gen_hints(txt, kind='p', hl=None):
     eb='\xA0\xF2'
     ec='\xA0\xF3'
     ez='\xA0\xF4'
-    ma='<span bgcolor="lightgreen" fgcolor="black" weight="bold">'
-    mb='<span color="yellow">'
-    mc='<span bgcolor="#006400" fgcolor="black" weight="bold">'
-    mz='</span>'
+    ma='\x1b[48;5;82m\x1b[30m'  # bg: light green, fg: black
+    mb='\x1b[93m'               # fg: light yellow
+    mc='\x1b[48;5;28m\x1b[30m'  # bg: dark green, fg: black
+    mz='\x1b[0m'                # reset
 
     if kind == 'p':
         pat = re.compile(r'(~?[\w/\._-]+/[\w/\._-]+)')
@@ -174,12 +175,13 @@ def gen_hints(txt, kind='p', hl=None):
                     return n+s[1:] # fade item
                 else:
                     return eb+s+ez # highlight item
-            return eb+n+s[1:]+ez
+            return eb+n+eb+s[1:]+ez
+            #return eb+n+s[1:]+ez
 
     out = re.sub(pat, replace_cb, txt)
 
     ## escape & fill markup   # NOTE: it's not safe if txt has our special escapes
-    out = GLib.markup_escape_text(out)
+    # out = GLib.markup_escape_text(out)  ## TODO: escape ANSI //plain text don't need
     tbl = { ea:ma, eb:mb, ec:mc, ez:mz }
     for e,m in tbl.items(): out = out.replace(e,m)
     # print(out)
@@ -187,13 +189,13 @@ def gen_hints(txt, kind='p', hl=None):
     ## append hotkeys
     # return out[:-1] + '>>' # note: maybe not \n
     tip_hotkeys = '''
-    <span bgcolor="#006400" fgcolor="black" weight="bold">h</span>ex
-    <span bgcolor="#006400" fgcolor="black" weight="bold">d</span>ec
-    <span bgcolor="#006400" fgcolor="black" weight="bold">w</span>ord
-    <span bgcolor="#006400" fgcolor="black" weight="bold">l</span>i<span
-          bgcolor="#006400" fgcolor="black" weight="bold">n</span>e
-    <span bgcolor="#006400" fgcolor="black" weight="bold">i</span>p
-    <span bgcolor="#006400" fgcolor="black" weight="bold">u</span>rl
+    \x1b[48;5;28m\x1b[97mh\x1b[0mex
+    \x1b[48;5;28m\x1b[97md\x1b[0mec
+    \x1b[48;5;28m\x1b[97mw\x1b[0mord
+    \x1b[48;5;28m\x1b[97ml\x1b[0mi
+    \x1b[48;5;28m\x1b[97mn\x1b[0me
+    \x1b[48;5;28m\x1b[97mi\x1b[0mp
+    \x1b[48;5;28m\x1b[97mu\x1b[0mrl
     '''
     tip_hotkeys = re.sub(r'\s*\n\s*', ' ', tip_hotkeys)
     # print(out)
@@ -222,7 +224,7 @@ class MyHintsImpl:
         self.term = term
         self.win = None
         self.tv = None
-        self.tb = None
+        # self.tb = None
         self.scrollbar_visible = None
 
         self.txt = None
@@ -288,6 +290,8 @@ class MyHintsImpl:
             self.init_ui()
             self.init_style()
 
+        ## back draw
+        hide_widget(self.tv)
         self.txt, _ = term.vte.get_text()
         self.kind = 'p'
         self.key_old = None
@@ -299,17 +303,16 @@ class MyHintsImpl:
         self.scrollbar_visible = term.scrollbar.props.visible
         # hide term
         hide_widget(term.vte)
-        hide_widget(term.scrollbar)
+        # hide_widget(term.scrollbar)
 
         # show hints
         show_widget(self.win)
+        show_widget(self.tv)
         self.tv.grab_focus()
 
     ### --------- hints inner
     def init_ui(self):
-        tv = Gtk.TextView()
-        tb = tv.get_buffer()
-
+        tv = Vte.Terminal()
         win = Gtk.ScrolledWindow()
         win.add(tv)
         # print('++add_win:', win)
@@ -317,33 +320,36 @@ class MyHintsImpl:
         tv.connect('key-release-event', self.on_key_release)
         # print('self term box:', self.term.terminalbox)
         self.term.terminalbox.pack_start(win, True, True, 0)
+        self.term.terminalbox.reorder_child(win, 1)
 
         self.win = win
         self.tv = tv
-        self.tb = tb
 
     def init_style(self):
-        self.tv.set_wrap_mode(Gtk.WrapMode.CHAR)
-        self.tv.set_property('cursor-visible', False)
-        self.tv.set_property('editable', False)
-        self.tv.override_font(self.term.vte.get_font().copy())
+        self.tv.set_font(self.term.vte.get_font().copy())
+        self.tv.set_color_cursor(Gdk.RGBA(0,0,0,0))
+        self.tv.set_color_cursor_foreground(Gdk.RGBA(0,0,0,0))
+        self.tv.set_cursor_blink_mode(Vte.CursorBlinkMode.OFF)
+        self.tv.set_cursor_shape(Vte.CursorShape.UNDERLINE)
 
-        prov = Gtk.CssProvider.new()
-        prov.load_from_data('''
-        text {
-            color: grey;
-            background-color: black;
-        }
-        '''.encode())
+        # self.tv.set_colors(Gdk.RGBA(0.5,0.5,0.5, 1), Gdk.RGBA(0.1,0.1,0.1, 1), None)  # fg,bg,palette
+        self.tv.set_color_foreground(Gdk.RGBA(0.5,0.5,0.5, 1))
+        self.tv.set_color_background(Gdk.RGBA(0.1,0.1,0.1, 1))
 
-        # self.win.set_opacity(0.8)
-        ctx = self.win.get_style_context()
-        ctx.add_provider_for_screen(self.win.get_screen(), prov, 800)
-        pass
+    ## disp text
+    def set_htm(self, txt): ## NOTE: It's ansi sequence now
+        # clear_screen = '\033[2J\033[H'
+        # self.tv.feed(clear_screen.encode("utf-8"))
+        # hide_cursor = '\033[?25l'
+        # self.tv.feed(hide_cursor.encode("utf-8"))
 
-    def set_htm(self, txt): ## NOTE: It not real HTML, just `Pango Markup`
-        self.tb.set_text('')
-        self.tb.insert_markup(self.tb.get_end_iter(), txt, -1)
+        # self.tv.reset(True, True)
+        self.tv.reset(False, True)
+
+        txt = txt.replace('\n','\r\n')
+        # txt = hide_cursor + txt
+        self.tv.feed(txt.encode("utf-8"))
+
 
     def on_key_press(self, elem, event):
         key = Gdk.keyval_name(event.keyval)
