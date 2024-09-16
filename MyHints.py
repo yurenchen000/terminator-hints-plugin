@@ -338,7 +338,6 @@ class MyHintsImpl:
         hide_widget(ti)
 
         # Handle input for ti
-        # ti.connect("activate",          self.on_ti_change)
         ti.connect("key-press-event",   self.on_ti_key_press)
         ti.connect("key-release-event", self.on_ti_key_release)
 
@@ -404,13 +403,6 @@ class MyHintsImpl:
                 return True
             return None
 
-    # def on_ti_change(self, elem):
-    #     input_text = elem.get_text()
-    #     print('ti change:', input_text)
-
-    #     self.try_custom_match(elem)
-    #     hide_widget(self.ti)
-    #     self.tv.grab_focus()
 
     def on_ti_key_press(self, elem, event):
         key = Gdk.keyval_name(event.keyval)
