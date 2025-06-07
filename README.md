@@ -65,3 +65,9 @@ kind change
 - [terminator-editor-plugin](https://github.com/mchelem/terminator-editor-plugin)  
   // the inspect way to get_terminal in plugin
 
+<br>
+
+## Other Plugins
+
+[![related-repos](https://res.ez2.fun/svg/repos-terminator_plugin.svg)](https://github.com/yurenchen000/yurenchen000/blob/main/repos.md#terminator-plugins)
+
